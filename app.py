@@ -5,7 +5,14 @@ import numpy as np
 import onnxruntime as ort
 import streamlit as st
 from PIL import Image
-from transformers import AutoImageProcessor
+
+try:
+    from transformers import AutoImageProcessor as AutoProcessorClass
+except ImportError:
+    try:
+        from transformers import AutoFeatureExtractor as AutoProcessorClass
+    except ImportError:
+        from transformers import AutoProcessor as AutoProcessorClass
 
 ONNX_MODEL_PATH = Path("onnx_output/model.onnx")
 CONFIG_PATH = Path("onnx_output/config.json")
@@ -20,7 +27,7 @@ def load_resources():
         raise FileNotFoundError(f"Config file not found at '{CONFIG_PATH}'")
 
     session = ort.InferenceSession(str(ONNX_MODEL_PATH), providers=["CPUExecutionProvider"])
-    processor = AutoImageProcessor.from_pretrained(PREPROCESSOR_PATH, use_fast=False)
+    processor = AutoProcessorClass.from_pretrained(PREPROCESSOR_PATH, use_fast=False)
 
     with open(CONFIG_PATH, "r") as f:
         config_data = json.load(f)
